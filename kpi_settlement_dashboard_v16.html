@@ -173,7 +173,7 @@ const SHEET_SALES = '18c14-81OIyTkA134TqGXHpaSvexg_m8O67IDkECpcIQ';
 const SHEET_MASTER = 'MASTER';
 const SHEET_PRICE_MAP = '단가_매핑';
 const SHEET_AD = '광고비설정';
-const AD_SETTING_APP_URL = ''; // Apps Script 웹앱 URL을 여기에 넣으면 광고비 탭 버튼에서 열립니다.
+const AD_SETTING_APP_URL = 'https://script.google.com/macros/s/AKfycbzNZrBoTta79eBRhQhj0jy_TbQdsPf4dtl7pStWZxM84J_L3q0AsnhyQHyFnhxt7pMMlw/exec?p=adCost'; // Apps Script 웹앱 URL을 여기에 넣으면 광고비 탭 버튼에서 열립니다.
 const VAT_RATE = 0.10;
 const DEFAULT_MALL = '네오디스';
 function normMallName(v){const s=String(v||'').trim(); if(!s)return ''; if(s.includes('맥필드'))return '맥필드스토어'; if(s.includes('네오디스'))return '네오디스'; return s;}
