@@ -173,7 +173,7 @@ const SHEET_SALES = '18c14-81OIyTkA134TqGXHpaSvexg_m8O67IDkECpcIQ';
 const SHEET_MASTER = 'MASTER';
 const SHEET_PRICE_MAP = '단가_매핑';
 const SHEET_AD = '광고비설정';
-const AD_SETTING_APP_URL = 'https://script.google.com/macros/s/AKfycbzNZrBoTta79eBRhQhj0jy_TbQdsPf4dtl7pStWZxM84J_L3q0AsnhyQHyFnhxt7pMMlw/exec?p=adCost'; // Apps Script 웹앱 URL을 여기에 넣으면 광고비 탭 버튼에서 열립니다.
+const AD_SETTING_APP_URL = ''; // Apps Script 웹앱 URL을 여기에 넣으면 광고비 탭 버튼에서 열립니다.
 const VAT_RATE = 0.10;
 const DEFAULT_MALL = '네오디스';
 function normMallName(v){const s=String(v||'').trim(); if(!s)return ''; if(s.includes('맥필드'))return '맥필드스토어'; if(s.includes('네오디스'))return '네오디스'; return s;}
@@ -212,23 +212,40 @@ function countWeekdayWeekendInMonth(monthKey){
   }
   return {weekday,weekend};
 }
+function getByHeader(row,names){
+  const norm=s=>String(s||'').replace(/\u00A0/g,' ').replace(/\s+/g,'').trim().toLowerCase();
+  const keys=Object.keys(row||{});
+  for(const name of names){
+    const target=norm(name);
+    const found=keys.find(k=>!String(k).endsWith('__rawv') && norm(k)===target);
+    if(found!==undefined) return row[found];
+  }
+  return '';
+}
 function normalizeMonth(v){
   if(v instanceof Date)return monthKeyOfDate(v);
+  if(typeof v==='number'){
+    // Google Visualization API가 YYYY-MM 값을 날짜/시리얼로 돌려주는 경우 방어
+    const d=parseDate(v);
+    if(d)return monthKeyOfDate(d);
+  }
   const s=String(v||'').trim();
-  const m=s.match(/(\d{4})[-\.\/년\s]*(\d{1,2})/);
+  let m=s.match(/Date\((\d+),(\d+),(\d+)/);
+  if(m)return m[1]+'-'+String(+m[2]+1).padStart(2,'0');
+  m=s.match(/(\d{4})[-\.\/년\s]*(\d{1,2})/);
   if(!m)return '';
   return m[1]+'-'+String(+m[2]).padStart(2,'0');
 }
 function readAdSettingRow(r){
-  const month=normalizeMonth(r['적용월']||r['월']||r['기준월']||r['month']);
-  const mall=normMallName(r['쇼핑몰']||r['회사']);
-  const monthly=num(r['월광고비']||r['광고비']||r['월예산']||r['예산']);
-  let weekendRatio=r['주말비율'];
+  const month=normalizeMonth(getByHeader(r,['적용월','적용 월','월','기준월','기준 월','month']));
+  const mall=normMallName(getByHeader(r,['쇼핑몰','회사','몰','스토어']));
+  const monthly=num(getByHeader(r,['월광고비','월 광고비','광고비','월예산','월 예산','예산']));
+  let weekendRatio=getByHeader(r,['주말비율','주말 비율','주말광고비율','주말 광고비율']);
   if(weekendRatio===undefined||weekendRatio===null||weekendRatio==='')weekendRatio=0.1;
   weekendRatio=num(weekendRatio);
   if(weekendRatio>1)weekendRatio=weekendRatio/100;
-  const memo=String(r['메모']||'').trim();
-  const updated=r['수정일시']||r['수정일']||'';
+  const memo=String(getByHeader(r,['메모','비고'])||'').trim();
+  const updated=getByHeader(r,['수정일시','수정 일시','수정일','수정 일']);
   return {month,mall,monthly,weekendRatio,memo,updated};
 }
 function calcDailyAdFromSetting(setting,dateStr){
@@ -566,7 +583,7 @@ function renderAds(data){
   const settingRows=(data.ads.settings||[]).map(r=>[
     r.month,mallLabel(r.mall),Math.round(r.monthly),r.weekendRatio,Math.round(r.weekdayDaily),Math.round(r.weekendDaily),r.weekdayCount,r.weekendCount,r.memo||'',r.updated||''
   ]).sort((a,b)=>String(a[0]).localeCompare(String(b[0]))||String(a[1]).localeCompare(String(b[1]),'ko'));
-  if(!settingRows.length)settingRows.push(['-','-',0,0,0,0,0,0,'광고비설정 시트에 해당 월/쇼핑몰 설정이 없습니다.','']);
+  if(!settingRows.length)settingRows.push(['-','-',0,0,0,0,0,0,'광고비설정 시트에서 해당 월/회사 설정을 찾지 못했습니다. 적용월/회사/월광고비 컬럼명을 확인하세요.','']);
   renderSimpleTable('adSettingTable',['적용월','쇼핑몰','월광고비','주말비율','평일 일광고비','주말 일광고비','평일수','주말수','메모','수정일시'],settingRows);
 
   const rows=data.ads.rows.map(r=>[r.date,mallLabel(r.mall),r.sourceMonth||'',r.memo,Math.round(r.amount)]).sort((a,b)=>a[0].localeCompare(b[0])||String(a[1]).localeCompare(String(b[1]),'ko'));
