@@ -97,6 +97,8 @@ table{width:100%;border-collapse:collapse;font-size:12px;} th,td{padding:9px 8px
 .diff-up{color:#1a73e8;font-weight:900;}
 .diff-down{color:#d93025;font-weight:900;}
 .diff-flat{color:#5f6368;font-weight:800;}
+.total-row{background:#f1f3f4!important;font-weight:900;}
+.avg-row{background:#eef3fe!important;font-weight:900;}
 
 
 
@@ -357,6 +359,7 @@ body.locked .header,body.locked .container{filter:blur(2px);pointer-events:none;
     <div class="chart-box" style="margin-bottom:16px;"><div class="box-head"><div class="chart-title">일별 방문자 · 주문 · 매출 추이</div><div class="hint">방문자/매출은 좌측, 주문건수는 우측 축</div></div><div class="chart lg"><canvas id="monthlyTrendChart"></canvas></div></div>
     <div class="chart-box" style="margin-bottom:16px;"><div class="box-head"><div class="chart-title">비교기간 일별 방문자 · 주문 · 매출 추이</div><div class="hint" id="prevMonthHint">선택 기간과 같은 일수 기준 / 방문자·매출은 좌측, 주문건수는 우측 축</div></div><div class="chart lg"><canvas id="prevMonthTrendChart"></canvas></div></div>
     <div class="chart-box" style="margin-bottom:16px;"><div class="box-head"><div class="chart-title">월말 예상 달성판</div><div class="hint">단순 일평균 기준</div></div><div class="chart"><canvas id="forecastChart"></canvas></div></div>
+    <div class="table-box" style="margin-bottom:16px;"><div class="box-head"><div class="chart-title">선택기간 일별 방문자 · 주문 · 매출 표</div><div class="hint">현재 선택 기간 기준 / Total 포함</div></div><div style="overflow-x:auto;"><table id="monthlyTrendTable"></table></div></div>
   </div>
   <div id="conversion" class="panel">
 
@@ -518,6 +521,7 @@ body.locked .header,body.locked .container{filter:blur(2px);pointer-events:none;
       <div class="chart-box"><div class="box-head"><div class="chart-title">구매금액 분포</div><div class="hint">고객별 누적 구매금액 구간</div></div><div class="chart dist-mobile"><canvas id="customerAmountDistChart"></canvas></div></div>
       <div class="chart-box"><div class="box-head"><div class="chart-title">재구매 분포</div><div class="hint">고객별 주문횟수 구간</div></div><div class="chart dist-mobile"><canvas id="customerRepeatDistChart"></canvas></div></div>
     </div>
+    <div class="table-box"><div class="box-head"><div class="chart-title">개인/사업자 매출 추정</div><div class="hint">수취인명·구매자명·배송지/상호성 키워드 기반 추정 / 개인정보는 마스킹</div></div><table id="customerTypeSummaryTable"></table></div>
     <div class="table-box"><div class="box-head"><div class="chart-title">충성고객 후보</div><div class="hint">구매자명/구매자ID/수취인 컬럼이 있을 때 표시</div></div><div class="customer-sort"><button id="sortOrdersBtn" class="active" onclick="setCustomerSort('orders')">주문횟수순</button><button id="sortRevenueBtn" onclick="setCustomerSort('revenue')">구매금액순</button></div><table id="customerTable"></table></div>
   </div>
 </div>
@@ -527,6 +531,7 @@ const SHEET_SALES = '18c14-81OIyTkA134TqGXHpaSvexg_m8O67IDkECpcIQ';
 const DOW = ['일','월','화','수','목','금','토'];
 let charts = {};
 let rawVisit = [], rawSales = [], rawPriceMap = [];
+const dlNum={display:(ctx)=>{const v=ctx.dataset.data[ctx.dataIndex];return v!==null&&v!==undefined&&Number(v)!==0;},anchor:'end',align:'top',offset:2,formatter:v=>Number(v).toLocaleString(),font:{weight:'700',size:10},color:'#202124',clip:false};
 function gvizJsonp(baseUrl){return new Promise((resolve,reject)=>{const cb='__gviz_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const script=document.createElement('script');let done=false;const timer=setTimeout(()=>{if(done)return;cleanup();reject(new Error('응답 시간 초과'));},20000);function cleanup(){done=true;clearTimeout(timer);try{delete window[cb];}catch(e){window[cb]=undefined;}if(script.parentNode)script.parentNode.removeChild(script);}window[cb]=function(j){cleanup();resolve(j);};script.onerror=function(){cleanup();reject(new Error('스크립트 로드 실패'));};const sep=baseUrl.includes('?')?'&':'?';script.src=baseUrl+sep+'tqx='+encodeURIComponent('out:json;responseHandler:'+cb)+'&headers=1&rand='+Date.now();document.head.appendChild(script);});}
 function formatCell(cell){if(!cell)return null;if(cell.v instanceof Date)return cell.v;if(typeof cell.v==='string'&&/^Date\(/.test(cell.v))return cell.v;if(typeof cell.v==='number')return cell.v;if(cell.f!==undefined&&cell.f!==null&&cell.f!=='')return cell.f;return cell.v??null;}
 function parseGvizResult(j,label){if(!j)throw new Error(label+' 응답 없음');if(j.status==='error'){const msg=(j.errors||[]).map(e=>e.detailed_message||e.message||e.reason).filter(Boolean).join(' / ');throw new Error(label+' 로드 실패: '+(msg||'Google 응답 오류'));}const cols=(j.table?.cols||[]).map((c,i)=>String(c.label||c.id||'col'+i).trim());const rows=(j.table?.rows||[]).map(row=>{const obj={};(row.c||[]).forEach((cell,i)=>{obj[cols[i]]=formatCell(cell);obj[cols[i]+'__rawv']=cell?(cell.v??null):null;});return obj;}).filter(row=>Object.values(row).some(v=>v!==null&&v!==''));if(!rows.length)throw new Error(label+' 시트가 비어있음');return rows;}
@@ -769,7 +774,8 @@ function refresh(){
     {label:'주문건수',type:'bar',data:dailyOrders,backgroundColor:'rgba(24,128,56,.72)',borderColor:'#188038',borderWidth:1,yAxisID:'y1',order:1},
     {label:'방문자',type:'line',data:dailyVisits,borderColor:'#1a73e8',backgroundColor:'rgba(26,115,232,.08)',borderWidth:3,pointRadius:3,tension:.25,yAxisID:'y',order:2},
     {label:'매출(만원)',type:'line',data:dailyRev,borderColor:'#d93025',backgroundColor:'rgba(217,48,37,.08)',borderWidth:2,borderDash:[6,4],pointRadius:2,tension:.25,yAxisID:'y',order:3}
-  ],true,{yMax:commonYMax,y1Max:commonY1Max});
+  ],true,{yMax:commonYMax,y1Max:commonY1Max,datalabels:dlNum});
+  renderTrendTable('monthlyTrendTable',dates,dailyVisits,dailyOrders,dailyRev);
 
   const prevHint=document.getElementById('prevMonthHint');
   if(prevHint && prevDates.length){
@@ -779,8 +785,8 @@ function refresh(){
     {label:compare.label+' 주문건수',type:'bar',data:prevDailyOrders,backgroundColor:'rgba(24,128,56,.72)',borderColor:'#188038',borderWidth:1,yAxisID:'y1',order:1},
     {label:compare.label+' 방문자',type:'line',data:prevDailyVisits,borderColor:'#1a73e8',backgroundColor:'rgba(26,115,232,.08)',borderWidth:3,pointRadius:3,tension:.25,yAxisID:'y',order:2},
     {label:compare.label+' 매출(만원)',type:'line',data:prevDailyRev,borderColor:'#d93025',backgroundColor:'rgba(217,48,37,.08)',borderWidth:2,borderDash:[6,4],pointRadius:2,tension:.25,yAxisID:'y',order:3}
-  ],true,{yMax:commonYMax,y1Max:commonY1Max});
-  draw('forecastChart','bar',['방문자','주문','매출(만원)'],[
+  ],true,{yMax:commonYMax,y1Max:commonY1Max,datalabels:dlNum});
+draw('forecastChart','bar',['방문자','주문','매출(만원)'],[
     {label:'현재',data:[visitTotal,orderTotal,Math.round(revTotal/10000)],backgroundColor:'#9aa0a6'},
     {label:'월말예상',data:[Math.round(fVisit),Math.round(fOrders),Math.round(fRev/10000)],backgroundColor:'#1a73e8'}
   ],true,{
@@ -796,6 +802,16 @@ function refresh(){
   });
   renderConversion(visit,sales);renderCompetitor(start,end);renderHistory(dates,dailyVisits,dailyOrders,dailyRev,visit,sales);renderProduct(sales);renderCustomer(sales);
   document.getElementById('status').textContent=`분석 완료: ${sel.label} / ${start} ~ ${end}`;
+}
+
+
+function renderTrendTable(id,dates,visits,orders,revs){
+  const rows=(dates||[]).map((d,i)=>({d,visit:Number(visits[i])||0,orders:Number(orders[i])||0,rev:Number(revs[i])||0}));
+  const total=rows.reduce((a,r)=>{a.visit+=r.visit;a.orders+=r.orders;a.rev+=r.rev;return a;},{visit:0,orders:0,rev:0});
+  let html='<tr><th>일자</th><th>방문자</th><th>주문건수</th><th>매출(만원)</th></tr>';
+  html+=rows.map(r=>`<tr><td>${String(r.d).slice(5)}</td><td>${Math.round(r.visit).toLocaleString()}</td><td>${Math.round(r.orders).toLocaleString()}</td><td>${Math.round(r.rev).toLocaleString()}</td></tr>`).join('');
+  html+=`<tr class="total-row"><th>Total</th><th>${Math.round(total.visit).toLocaleString()}</th><th>${Math.round(total.orders).toLocaleString()}</th><th>${Math.round(total.rev).toLocaleString()}</th></tr>`;
+  const el=document.getElementById(id); if(el)el.innerHTML=html;
 }
 
 function colorByValue(v,max){
@@ -842,7 +858,7 @@ function renderHourConversionDistribution(hVisit,hOrders,hRevMan){
   draw('hourConversionDistChart','bar',labels,[
     {label:'전환율(%)',type:'bar',data:conv,backgroundColor:'rgba(26,115,232,.72)',borderColor:'#1a73e8',borderWidth:1,yAxisID:'y',order:1},
     {label:'매출(만원)',type:'line',data:hRevMan,borderColor:'#d93025',backgroundColor:'rgba(217,48,37,.08)',borderWidth:3,pointRadius:2,tension:.25,yAxisID:'y1',order:2}
-  ],true,{yTitle:'전환율 %',y1Title:'매출(만원)',datalabels:{display:(ctx)=>ctx.dataset.label==='전환율(%)'&&ctx.dataset.data[ctx.dataIndex]>0,anchor:'end',align:'top',formatter:v=>Number(v).toFixed(1)+'%',font:{weight:'700',size:10},color:'#202124'}});
+  ],true,{yTitle:'전환율 %',y1Title:'매출(만원)',datalabels:{display:(ctx)=>Number(ctx.dataset.data[ctx.dataIndex])>0,anchor:'end',align:'top',formatter:(v,ctx)=>ctx.dataset.label==='전환율(%)'?Number(v).toFixed(1)+'%':Number(v).toLocaleString(),font:{weight:'700',size:10},color:'#202124'}});
 }
 function customerBucketsFromSales(sales){
   const candidates=['구매자명','구매자ID','구매자 아이디','수취인명','수령인','주문자명'];
@@ -870,8 +886,8 @@ function customerBucketsFromSales(sales){
 }
 function renderCustomerDistributions(sales){
   const b=customerBucketsFromSales(sales);
-  draw('customerAmountDistChart','bar',b.amountLabels,[{label:'고객 수',data:b.amountData,backgroundColor:'rgba(26,115,232,.75)',borderColor:'#1a73e8',borderWidth:1}],false,{datalabels:{display:true,anchor:'end',align:'top',formatter:v=>Number(v).toLocaleString(),font:{weight:'700',size:10},color:'#202124'}});
-  draw('customerRepeatDistChart','doughnut',b.repeatLabels,[{label:'고객 수',data:b.repeatData}],true,{datalabels:{display:true,formatter:(v,ctx)=>v?ctx.chart.data.labels[ctx.dataIndex]+'\n'+v.toLocaleString():'' ,font:{weight:'700',size:10},color:'#202124'}});
+  draw('customerAmountDistChart','bar',b.amountLabels,[{label:'고객 수',data:b.amountData,backgroundColor:'rgba(26,115,232,.75)',borderColor:'#1a73e8',borderWidth:1}],false,{datalabels:{display:true,anchor:'end',align:'top',formatter:(v,ctx)=>{const sum=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+Number(b||0),0);return Number(v).toLocaleString()+'\n'+(sum?(Number(v)/sum*100).toFixed(1)+'%':'0.0%');},font:{weight:'700',size:10},color:'#202124'}});
+  draw('customerRepeatDistChart','doughnut',b.repeatLabels,[{label:'고객 수',data:b.repeatData}],true,{datalabels:{display:true,formatter:(v,ctx)=>{if(!v)return ''; const sum=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+Number(b||0),0); return ctx.chart.data.labels[ctx.dataIndex]+'\n'+v.toLocaleString()+'명\n'+(sum?(Number(v)/sum*100).toFixed(1)+'%':'0.0%');},font:{weight:'700',size:10},color:'#202124'}});
 }
 
 function renderConversion(visit,sales){
@@ -889,7 +905,7 @@ function renderConversion(visit,sales){
     {label:'방문자',type:'line',data:hVisit,borderColor:'#1a73e8',backgroundColor:'rgba(26,115,232,.08)',borderWidth:3,pointRadius:2,tension:.25,yAxisID:'y',order:2},
     {label:'주문건수',type:'bar',data:hOrders,backgroundColor:'rgba(24,128,56,.75)',borderColor:'#188038',borderWidth:1,yAxisID:'y1',order:1},
     {label:'매출(만원)',type:'line',data:hRevMan,borderColor:'#d93025',backgroundColor:'rgba(217,48,37,.08)',borderWidth:2,borderDash:[6,4],pointRadius:2,tension:.25,yAxisID:'y',order:3}
-  ],true,{yTitle:'방문자 / 매출(만원)',y1Title:'주문건수'});
+  ],true,{yTitle:'방문자 / 매출(만원)',y1Title:'주문건수',datalabels:dlNum});
 
   const dowVisit=Array(7).fill(0);
   const dowOrders=Array(7).fill(0);
@@ -908,11 +924,11 @@ function renderConversion(visit,sales){
     {label:'매출(만원)',type:'line',data:dowRevMan,borderColor:'#d93025',backgroundColor:'rgba(217,48,37,.08)',borderWidth:3,borderDash:[6,4],pointRadius:3,tension:.25,yAxisID:'y1'}
   ],true,{yTitle:'전환율 %',y1Title:'매출(만원)',
     datalabels:{
-      display:function(ctx){return ctx.dataset.label==='전환율(%)';},
+      display:function(ctx){return Number(ctx.dataset.data[ctx.dataIndex])>0;},
       anchor:'end',
       align:'top',
       offset:2,
-      formatter:v=>Number(v).toFixed(1)+'%',
+      formatter:(v,ctx)=>ctx.dataset.label==='전환율(%)'?Number(v).toFixed(1)+'%':Number(v).toLocaleString(),
       font:{weight:'700',size:11},
       color:'#202124'
     }
@@ -942,7 +958,7 @@ function renderConversion(visit,sales){
       {label:'방문자',type:'line',data:x.vByHour,borderColor:'#1a73e8',backgroundColor:'rgba(26,115,232,.08)',borderWidth:2,pointRadius:1,tension:.25,yAxisID:'y',order:2},
       {label:'주문건수',type:'bar',data:x.oByHour,backgroundColor:'rgba(24,128,56,.72)',borderColor:'#188038',borderWidth:1,yAxisID:'y1',order:1},
       {label:'매출(만원)',type:'line',data:x.rByHourMan,borderColor:'#d93025',backgroundColor:'rgba(217,48,37,.08)',borderWidth:2,borderDash:[6,4],pointRadius:1,tension:.25,yAxisID:'y',order:3}
-    ],true,{yTitle:'방문 / 매출(만원)',y1Title:'주문',yMax:commonDowY,y1Max:commonDowY1});
+    ],true,{yTitle:'방문 / 매출(만원)',y1Title:'주문',yMax:commonDowY,y1Max:commonDowY1,datalabels:dlNum});
   }
 
   const weak=hours.map((h,i)=>({
@@ -978,7 +994,8 @@ function renderConversion(visit,sales){
       }
 
       return `<tr class="${cls}"><td>${r.h}</td><td>${Math.round(r.visit).toLocaleString()}</td><td>${r.orders}</td><td>${money(r.rev)}</td><td>${r.visit?r.conv.toFixed(1)+'%':'-'}</td><td><b>${judge}</b></td></tr>`;
-    }).join('');
+    }).join('')+
+    `<tr class="total-row"><th>Total</th><th>${Math.round(hVisit.reduce((a,b)=>a+b,0)).toLocaleString()}</th><th>${hOrders.reduce((a,b)=>a+b,0).toLocaleString()}</th><th>${money(hRev.reduce((a,b)=>a+b,0))}</th><th>${hVisit.reduce((a,b)=>a+b,0)?(hOrders.reduce((a,b)=>a+b,0)/hVisit.reduce((a,b)=>a+b,0)*100).toFixed(1)+'%':'-'}</th><th>-</th></tr>`;
 }
 
 function storeCleanName(s){
@@ -1182,7 +1199,7 @@ function renderSelectedCompetitorViews(){
   const hourLabels=Array.from({length:24},(_,i)=>String(i).padStart(2,'0')+'시');
   const hourSets=[lineDs('All Average',series(compState.allHourAvg),'#000000',4)];
   selected.forEach((s,i)=>hourSets.push(lineDs(s,series(compState.hourCumAvgByStore[s]),compColor(i),3)));
-  draw('selectedStoreHourChart','line',hourLabels,hourSets,true,{yTitle:'누적평균 방문자'});
+  draw('selectedStoreHourChart','line',hourLabels,hourSets,true,{yTitle:'누적평균 방문자',datalabels:dlNum});
 
   const incSeries=(arr)=>{
     let prev=null;
@@ -1196,7 +1213,7 @@ function renderSelectedCompetitorViews(){
   };
   const incSets=[lineDs('All Average',incSeries(compState.allHourAvg),'#000000',4)];
   selected.forEach((s,i)=>incSets.push(lineDs(s,incSeries(compState.hourCumAvgByStore[s]),compColor(i),3)));
-  draw('selectedStoreHourIncChart','line',hourLabels,incSets,true,{yTitle:'시간대 방문자 평균'});
+  draw('selectedStoreHourIncChart','line',hourLabels,incSets,true,{yTitle:'시간대 방문자 평균',datalabels:dlNum});
 
   let hHtml='<tr><th>시간</th><th>평균</th><th>전체</th>'+selected.map(s=>`<th>${storeCleanName(s)}</th>`).join('')+'</tr>';
   hourLabels.forEach((lab,h)=>{
@@ -1223,7 +1240,7 @@ function renderSelectedCompetitorViews(){
     daySets.push(lineDs(s,validIdx.map(idx=>arrAt(compState.dailyByStore,s,idx)),compColor(i),3));
   });
 
-  draw('selectedStoreDailyChart','line',dayLabels,daySets,true,{yTitle:'일별 방문자',xLabelFull:true});
+  draw('selectedStoreDailyChart','line',dayLabels,daySets,true,{yTitle:'일별 방문자',xLabelFull:true,datalabels:dlNum});
 
   let dHtml='<tr><th>날짜</th><th>평균</th><th>전체</th>'+selected.map(s=>`<th>${storeCleanName(s)}</th>`).join('')+'</tr>';
   validIdx.forEach(i=>{
@@ -1298,10 +1315,14 @@ function renderCompetitor(start,end){
     };
   }).sort((a,b)=>b.avg-a.avg);
 
+  const compare=getComparePeriodSafe(start,end);
+  const prevByStore={};
+  buildVisit(compare.start,compare.end,[]).dailyRows.forEach(r=>{if(!prevByStore[r.store])prevByStore[r.store]={visit:0,days:0}; prevByStore[r.store].visit+=r.visit; prevByStore[r.store].days++;});
   const topVisit=rows.slice(0,15);
   draw('compVisitChart','bar',topVisit.map(r=>r.store),[
-    {label:'일평균 방문자',data:topVisit.map(r=>Math.round(r.avg)),backgroundColor:'#1a73e8'}
-  ],false,{
+    {label:'일평균 방문자',data:topVisit.map(r=>Math.round(r.avg)),backgroundColor:'#1a73e8'},
+    {label:compare.label+' 일평균 방문자',data:topVisit.map(r=>{const p=prevByStore[r.raw];return p&&p.days?Math.round(p.visit/p.days):0;}),backgroundColor:'rgba(217,48,37,.65)'}
+  ],true,{
     xLabelFull:true,
     datalabels:{
       display:true,anchor:'end',align:'top',offset:2,
@@ -1626,7 +1647,7 @@ function setSimpleTable(id, headers, rows){
   if(!el)return;
   const esc=v=>String(v==null?'':v).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
   const head='<tr>'+headers.map(h=>'<th>'+esc(h)+'</th>').join('')+'</tr>';
-  const body=(rows||[]).map(row=>'<tr>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('');
+  const body=(rows||[]).map(row=>'<tr'+(String(row[0])==='Total'?' class="total-row"':'')+'>'+row.map(v=>'<td>'+esc(v)+'</td>').join('')+'</tr>').join('');
   el.innerHTML=head+body;
 }
 
@@ -1639,6 +1660,54 @@ function setCustomerSort(mode){
   if(b)b.classList.toggle('active',mode==='revenue');
   if(lastCustomerSales)renderCustomer(lastCustomerSales);
 }
+
+function firstNonEmpty(row,names){
+  for(const n of names){
+    const v=String(row[n]||'').trim();
+    if(v)return {name:n,value:v};
+  }
+  return {name:'',value:''};
+}
+function maskName(v){
+  const s=String(v||'').trim();
+  if(!s)return '';
+  if(s.length<=1)return '*';
+  if(s.length===2)return s[0]+'*';
+  return s[0]+'*'+s[s.length-1];
+}
+function maskText(v){
+  const s=String(v||'').trim();
+  if(!s)return '';
+  const parts=s.split(/\s+/).filter(Boolean);
+  if(parts.length>=2)return parts.slice(0,2).join(' ')+' ***';
+  return s.length>3?s.slice(0,3)+'***':maskName(s);
+}
+function findBusinessKeyword(text){
+  const s=String(text||'').toLowerCase();
+  const kws=['주식회사','(주)','㈜','유한회사','법인','회사','상사','산업','공업','공장','기업','업체','사업자','매장','마트','상점','상가','사무실','사무소','관리사무소','학교','초등학교','중학교','고등학교','대학교','학원','유치원','어린이집','병원','의원','약국','의료원','연구소','연구원','센터','협회','조합','재단','교회','성당','사찰','카페','식당','물류','창고','관공서','군청','시청','구청'];
+  return kws.find(k=>s.includes(k.toLowerCase()))||'';
+}
+function classifyCustomerLine(r){
+  const bizNo=firstNonEmpty(r,['사업자등록번호','사업자 번호','사업자번호','사업자']);
+  if(bizNo.value)return {type:'사업자',reason:'사업자번호',evidence:'사업자번호: ***'};
+  const company=firstNonEmpty(r,['상호','회사명','업체명','법인명','기업명','사업장명']);
+  if(company.value)return {type:'사업자',reason:company.name,evidence:`${company.name}: ${maskText(company.value)}`};
+
+  const candidates=[
+    firstNonEmpty(r,['수취인명','수령인','받는분','수취인']),
+    firstNonEmpty(r,['구매자명','주문자명','주문자','구매자']),
+    firstNonEmpty(r,['배송지','주소','수취인 주소','수취인주소','기본배송지','배송지주소']),
+    firstNonEmpty(r,['배송메세지','배송메시지','배송 요청사항','배송요청사항','메모'])
+  ].filter(x=>x.value);
+
+  for(const c of candidates){
+    const kw=findBusinessKeyword(c.value);
+    if(kw)return {type:'사업자',reason:`${c.name} 키워드(${kw})`,evidence:`${c.name}: ${maskText(c.value)}`};
+  }
+
+  const person=firstNonEmpty(r,['구매자명','주문자명','수취인명','수령인','받는분','구매자ID','구매자 아이디']);
+  return {type:'개인',reason:person.name?person.name:'사업자 키워드 없음',evidence:person.value?`${person.name}: ${maskName(person.value)}`:'-'};
+}
 function renderCustomer(sales){
   lastCustomerSales=sales;
   renderCustomerDistributions(sales);
@@ -1648,16 +1717,43 @@ function renderCustomer(sales){
   const by={};
   sales.lineRows.forEach(r=>{
     const k=String(r[keyCol]||'').trim();if(!k)return;
-    if(!by[k])by[k]={name:k,orders:new Set(),rev:0,last:''};
+    if(!by[k])by[k]={name:k,orders:new Set(),rev:0,last:'',bizScore:0,personScore:0,reasons:{},evidence:{}};
     by[k].orders.add(String(r['주문번호']||r['상품주문번호']||''));
     by[k].rev+=r.amt;
     if(!by[k].last||r.ds>by[k].last)by[k].last=r.ds;
+    const cls=classifyCustomerLine(r);
+    if(cls.type==='사업자')by[k].bizScore++; else by[k].personScore++;
+    by[k].reasons[cls.reason]=(by[k].reasons[cls.reason]||0)+1;
+    if(cls.evidence)by[k].evidence[cls.evidence]=(by[k].evidence[cls.evidence]||0)+1;
   });
-  const rows=Object.values(by).sort((a,b)=>{
+  const allRows=Object.values(by).map(r=>{
+    const type=r.bizScore>0?'사업자':'개인';
+    const topReason=Object.entries(r.reasons).sort((a,b)=>b[1]-a[1])[0]?.[0]||'-';
+    const topEvidence=Object.entries(r.evidence).sort((a,b)=>b[1]-a[1])[0]?.[0]||'-';
+    return {...r,type,reason:topReason,evidence:topEvidence};
+  }).sort((a,b)=>{
     if(customerSortMode==='revenue')return b.rev-a.rev || b.orders.size-a.orders.size;
     return b.orders.size-a.orders.size || b.rev-a.rev;
-  }).slice(0,30);
-  setSimpleTable('customerTable',['고객','주문횟수','총구매금액','최근구매일','분류'],rows.map(r=>[r.name,r.orders.size,money(r.rev),r.last,r.orders.size>=2?'충성고객 후보':'일회성/대량 후보']));
+  });
+
+  const summary={개인:{customers:0,orders:0,rev:0},사업자:{customers:0,orders:0,rev:0}};
+  allRows.forEach(r=>{
+    summary[r.type].customers++;
+    summary[r.type].orders+=r.orders.size;
+    summary[r.type].rev+=r.rev;
+  });
+  const totalRev=summary.개인.rev+summary.사업자.rev;
+  setSimpleTable('customerTypeSummaryTable',
+    ['구분','고객수','주문횟수','구매금액','매출비중'],
+    ['개인','사업자'].map(t=>[t,summary[t].customers,summary[t].orders,money(summary[t].rev),totalRev?(summary[t].rev/totalRev*100).toFixed(1)+'%':'0.0%'])
+      .concat([['Total',summary.개인.customers+summary.사업자.customers,summary.개인.orders+summary.사업자.orders,money(totalRev),'100.0%']])
+  );
+
+  const total={orders:0,rev:0};
+  allRows.forEach(r=>{total.orders+=r.orders.size; total.rev+=r.rev;});
+  const tableRows=allRows.map(r=>[r.name,r.type,r.orders.size,money(r.rev),r.last,r.orders.size>=2?'충성고객 후보':'일회성/대량 후보',r.reason,r.evidence]);
+  tableRows.push(['Total','-',total.orders,money(total.rev),'-','-','-','-']);
+  setSimpleTable('customerTable',['고객','개인/사업자','주문횟수','총구매금액','최근구매일','분류','판별기준','마스킹 근거'],tableRows);
 }
 function draw(id,type,labels,datasets,legend=false,extraOptions={}){
   if(charts[id])charts[id].destroy();

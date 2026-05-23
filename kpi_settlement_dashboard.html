@@ -504,15 +504,15 @@ function renderSummary(data,start,end,sel){
 
   draw('dailyProfitChart','bar',dates.map(d=>d.slice(5)),[
     {label:'매출수익(만원)',type:'bar',data:curIncome,backgroundColor:'rgba(26,115,232,.62)',borderColor:'#1a73e8',borderWidth:1,yAxisID:'y'},
-    {label:'순이익(만원)',type:'line',data:curProfit,borderColor:'#188038',backgroundColor:'#188038',pointBackgroundColor:'#188038',borderWidth:3,tension:.25,yAxisID:'y'},
-    {label:'광고차감 순이익(만원)',type:'line',data:curNetProfit,borderColor:'#7b1fa2',backgroundColor:'#7b1fa2',pointBackgroundColor:'#7b1fa2',borderWidth:3,borderDash:[6,4],tension:.25,yAxisID:'y'}
+    {label:'순이익(만원)',type:'bar',data:curProfit,backgroundColor:'rgba(24,128,56,.72)',borderColor:'#188038',borderWidth:1,yAxisID:'y'},
+    {label:'광고차감 순이익(만원)',type:'bar',data:curNetProfit,backgroundColor:'rgba(123,31,162,.72)',borderColor:'#7b1fa2',borderWidth:1,yAxisID:'y'}
   ],true,{xLabelFull:dates.length<=31,yMax:commonYMax,datalabels:{...dlAll,display:(ctx)=>ctx.dataset.data[ctx.dataIndex]!==null}});
 
   document.getElementById('compareHint').textContent=`${comp.label} ${comp.start} ~ ${comp.end} / 선택 기간과 같은 날짜 수 / 위 그래프와 y축 동일`;
   draw('compareProfitChart','bar',cd.map(d=>d.slice(5)),[
     {label:comp.label+' 매출수익(만원)',type:'bar',data:compIncome,backgroundColor:'rgba(26,115,232,.62)',borderColor:'#1a73e8',borderWidth:1,yAxisID:'y'},
-    {label:comp.label+' 순이익(만원)',type:'line',data:compProfit,borderColor:'#188038',backgroundColor:'#188038',pointBackgroundColor:'#188038',borderWidth:3,tension:.25,yAxisID:'y'},
-    {label:comp.label+' 광고차감 순이익(만원)',type:'line',data:compNetProfit,borderColor:'#7b1fa2',backgroundColor:'#7b1fa2',pointBackgroundColor:'#7b1fa2',borderWidth:3,borderDash:[6,4],tension:.25,yAxisID:'y'}
+    {label:comp.label+' 순이익(만원)',type:'bar',data:compProfit,backgroundColor:'rgba(24,128,56,.72)',borderColor:'#188038',borderWidth:1,yAxisID:'y'},
+    {label:comp.label+' 광고차감 순이익(만원)',type:'bar',data:compNetProfit,backgroundColor:'rgba(123,31,162,.72)',borderColor:'#7b1fa2',borderWidth:1,yAxisID:'y'}
   ],true,{xLabelFull:cd.length<=31,yMax:commonYMax,datalabels:{...dlAll,display:(ctx)=>ctx.dataset.data[ctx.dataIndex]!==null}});
 
   draw('costPieChart','doughnut',[
@@ -523,7 +523,7 @@ function renderSummary(data,start,end,sel){
     Math.max(0,Math.round(t.shipCost)),
     Math.max(0,Math.round(t.ad||0)),
     Math.max(0,Math.round(t.netProfit))
-  ]}],true,{datalabels:{display:true,formatter:(v,ctx)=>ctx.chart.data.labels[ctx.dataIndex]+'\n'+money(v),font:{weight:'700',size:11},color:'#202124'}});
+  ]}],true,{datalabels:{display:true,formatter:(v,ctx)=>{const data=ctx.chart.data.datasets[0].data;const sum=data.reduce((a,b)=>a+Number(b||0),0);return ctx.chart.data.labels[ctx.dataIndex]+'\n'+money(v)+'\n'+(sum?(Number(v)/sum*100).toFixed(1)+'%':'0.0%');},font:{weight:'700',size:11},color:'#202124'}});
 
   draw('dailyStackChart','bar',dates.map(d=>d.slice(5)),[
     {label:'쇼핑몰수수료(만원)',data:dates.map(d=>zeroVal(data.byDaily,d,'fee',10000)),stack:'매출수익',backgroundColor:'rgba(217,48,37,.45)',
@@ -544,13 +544,15 @@ function renderDaily(data){
 const start=document.getElementById('start').value,end=document.getElementById('end').value;
 const dates=fullPeriodDates(start,end);
 draw('dailyKpiChart','bar',dates.map(d=>d.slice(5)),[
-  {label:'주문건수',type:'bar',data:dates.map(d=>{const o=data.byDaily[d];return d>todayYmd()?null:(o?o.orders.size:null);}),backgroundColor:'rgba(24,128,56,.7)',yAxisID:'y1'},
-  {label:'상품매출(만원)',type:'line',data:dates.map(d=>dailyVal(data.byDaily,d,'sales',10000,true)),borderColor:'#1a73e8',backgroundColor:'#1a73e8',pointBackgroundColor:'#1a73e8',borderWidth:3,tension:.25,yAxisID:'y'},
-  {label:'순이익(만원)',type:'line',data:dates.map(d=>dailyVal(data.byDaily,d,'profit',10000,true)),borderColor:'#188038',backgroundColor:'#188038',pointBackgroundColor:'#188038',borderWidth:3,borderDash:[6,4],tension:.25,yAxisID:'y'},
-  {label:'광고차감 순이익(만원)',type:'line',data:dates.map(d=>dailyVal(data.byDaily,d,'netProfit',10000,true)),borderColor:'#d93025',backgroundColor:'#d93025',pointBackgroundColor:'#d93025',borderWidth:3,tension:.25,yAxisID:'y'}
+  {label:'주문건수',type:'line',data:dates.map(d=>{const o=data.byDaily[d];return d>todayYmd()?null:(o?o.orders.size:null);}),borderColor:'#188038',backgroundColor:'#188038',pointBackgroundColor:'#188038',borderWidth:3,tension:.25,yAxisID:'y1'},
+  {label:'상품매출(만원)',type:'bar',data:dates.map(d=>dailyVal(data.byDaily,d,'sales',10000,true)),backgroundColor:'rgba(26,115,232,.68)',borderColor:'#1a73e8',borderWidth:1,yAxisID:'y'},
+  {label:'순이익(만원)',type:'bar',data:dates.map(d=>dailyVal(data.byDaily,d,'profit',10000,true)),backgroundColor:'rgba(24,128,56,.72)',borderColor:'#188038',borderWidth:1,yAxisID:'y'},
+  {label:'광고차감 순이익(만원)',type:'bar',data:dates.map(d=>dailyVal(data.byDaily,d,'netProfit',10000,true)),backgroundColor:'rgba(217,48,37,.70)',borderColor:'#d93025',borderWidth:1,yAxisID:'y'}
 ],true,{yTitle:'매출/이익(만원)',y1Title:'주문건수',datalabels:{...dlAll,display:(ctx)=>ctx.dataset.data[ctx.dataIndex]!==null}});
 const tableDates=dates.filter(d=>d<=todayYmd());
 const rows=tableDates.map(d=>data.byDaily[d]?aggRow(d,data.byDaily[d]):[d,0,0,0,0,0,0,0,0,0,0,'0.0%',0,'0.0%']);
+const totalDaily=sumAggList(tableDates.map(d=>data.byDaily[d]).filter(Boolean));
+rows.push(aggRow('Total',totalDaily));
 renderTable('dailyTable',['일자','주문건수','판매수량','상품매출','배송비매출','정산예정금액','쇼핑몰수수료','상품원가','내부출고비','광고비','순이익','이익률','광고차감 순이익','광고차감 이익률'],rows,true);
 }
 function renderNamed(prefix,map,title){
@@ -575,6 +577,13 @@ function renderNamed(prefix,map,title){
     clip:false
   }});
   const tableRows=rows.map(r=>[r[0],r[1],r[2],r[3],r[4],Math.round((Number(r[3])||0)+(Number(r[4])||0)),r[5],r[6],r[7],r[8],r[9],r[10],r[11],r[12],r[13]]);
+  const sel=getSelected();
+  const needTotal=(prefix==='mall'&&sel.mall==='all')||(prefix==='whole'&&sel.whole==='all');
+  if(needTotal){
+    const totalObj=sumAggList(Object.values(map));
+    const tr=aggRow('Total',totalObj);
+    tableRows.push([tr[0],tr[1],tr[2],tr[3],tr[4],Math.round((Number(tr[3])||0)+(Number(tr[4])||0)),tr[5],tr[6],tr[7],tr[8],tr[9],tr[10],tr[11],tr[12],tr[13]]);
+  }
   renderTable(prefix+'Table',[title,'주문건수','판매수량','상품매출','배송비매출','매출수익','정산예정금액','쇼핑몰수수료','상품원가','내부출고비','광고비','순이익','이익률','광고차감 순이익','광고차감 이익률'],tableRows,true);
 }
 
@@ -705,7 +714,7 @@ function renderProductPareto(rows){
     {label:'상품매출(만원)',type:'bar',data:bars,backgroundColor:'rgba(26,115,232,.75)',borderColor:'#1a73e8',borderWidth:1,yAxisID:'y',order:1},
     {label:'누적비중(%)',type:'line',data:line,borderColor:'#d93025',backgroundColor:'rgba(217,48,37,.08)',borderWidth:3,pointRadius:3,tension:.25,yAxisID:'y1',order:2},
     {label:'80% 기준',type:'line',data:top.map(()=>80),borderColor:'#5f6368',borderDash:[5,5],borderWidth:2,pointRadius:0,yAxisID:'y1',order:3}
-  ],true,{xLabelFull:true,yTitle:'상품매출(만원)',y1Title:'누적비중 %',datalabels:{display:(ctx)=>ctx.dataset.label==='누적비중(%)',anchor:'end',align:'top',formatter:v=>Number(v).toFixed(1)+'%',font:{weight:'700',size:10},color:'#202124'}});
+  ],true,{xLabelFull:true,yTitle:'상품매출(만원)',y1Title:'누적비중 %',datalabels:{display:(ctx)=>ctx.dataset.label==='누적비중(%)'||ctx.dataset.label==='상품매출(만원)',anchor:'end',align:'top',formatter:(v,ctx)=>ctx.dataset.label==='누적비중(%)'?Number(v).toFixed(1)+'%':Number(v).toLocaleString(),font:{weight:'700',size:10},color:'#202124'}});
 }
 
 function renderProduct(data){
@@ -720,13 +729,19 @@ function renderProduct(data){
     {label:'광고차감 순이익(만원)',data:top.map(r=>Math.round(Math.max(0,r[17])/10000)),stack:'매출수익',backgroundColor:'rgba(24,128,56,.72)'}
   ],true,{xLabelFull:true,stacked:true,yTitle:'매출수익 구성(만원)',datalabels:{...dlAll,display:(ctx)=>ctx.dataset.data[ctx.dataIndex]>0}});
   const tableRows=rows.map(r=>[...r.slice(0,10),Math.round((Number(r[8])||0)+(Number(r[9])||0)),...r.slice(10)]);
+  const totalObj=sumAggList(Object.values(data.byProduct));
+  const tr=aggRow('Total',totalObj,['','','','','']);
+  tableRows.push([...tr.slice(0,10),Math.round((Number(tr[8])||0)+(Number(tr[9])||0)),...tr.slice(10)]);
   renderTable('productTable',['상품키','기준상품코드','상품명','카테고리대','카테고리중','카테고리소','주문건수','판매수량','상품매출','배송비매출','매출수익','정산예정금액','쇼핑몰수수료','상품원가','내부출고비','광고비','순이익','이익률','광고차감 순이익','광고차감 이익률'],tableRows,true);
 }
 function renderCategory(data){
   const rows=Object.entries(data.byCat).map(([k,o])=>aggRow(k,o)).sort((a,b)=>b[12]-a[12]);
-  draw('catSalesPie','pie',rows.map(r=>r[0]),[{label:'매출수익',data:rows.map(r=>Math.max(0,(r[3]||0)+(r[4]||0)))}],true,{datalabels:{display:true,formatter:(v,ctx)=>ctx.chart.data.labels[ctx.dataIndex]+'\n'+money(v),font:{weight:'700',size:11},color:'#202124'}});
-  draw('catProfitPie','pie',rows.map(r=>r[0]),[{label:'광고차감 순이익',data:rows.map(r=>Math.max(0,r[12]))}],true,{datalabels:{display:true,formatter:(v,ctx)=>ctx.chart.data.labels[ctx.dataIndex]+'\n'+money(v),font:{weight:'700',size:11},color:'#202124'}});
+  draw('catSalesPie','pie',rows.map(r=>r[0]),[{label:'매출수익',data:rows.map(r=>Math.max(0,(r[3]||0)+(r[4]||0)))}],true,{datalabels:{display:true,formatter:(v,ctx)=>{const data=ctx.chart.data.datasets[0].data;const sum=data.reduce((a,b)=>a+Number(b||0),0);return ctx.chart.data.labels[ctx.dataIndex]+'\n'+money(v)+'\n'+(sum?(Number(v)/sum*100).toFixed(1)+'%':'0.0%');},font:{weight:'700',size:11},color:'#202124'}});
+  draw('catProfitPie','pie',rows.map(r=>r[0]),[{label:'광고차감 순이익',data:rows.map(r=>Math.max(0,r[12]))}],true,{datalabels:{display:true,formatter:(v,ctx)=>{const data=ctx.chart.data.datasets[0].data;const sum=data.reduce((a,b)=>a+Number(b||0),0);return ctx.chart.data.labels[ctx.dataIndex]+'\n'+money(v)+'\n'+(sum?(Number(v)/sum*100).toFixed(1)+'%':'0.0%');},font:{weight:'700',size:11},color:'#202124'}});
   const tableRows=rows.map(r=>[...r.slice(0,5),Math.round((Number(r[3])||0)+(Number(r[4])||0)),...r.slice(5)]);
+  const totalObj=sumAggList(Object.values(data.byCat));
+  const tr=aggRow('Total',totalObj);
+  tableRows.push([...tr.slice(0,5),Math.round((Number(tr[3])||0)+(Number(tr[4])||0)),...tr.slice(5)]);
   renderTable('categoryTable',['카테고리대','주문건수','판매수량','상품매출','배송비매출','매출수익','정산예정금액','쇼핑몰수수료','상품원가','내부출고비','광고비','순이익','이익률','광고차감 순이익','광고차감 이익률'],tableRows,true);
 }
 function openAdSettingApp(){
@@ -745,7 +760,7 @@ function renderAds(data){
   renderSimpleTable('adTable',['일자','몰','월','구분','광고비'],rows);
 }
 function formatValue(i,v){if(typeof v==='number'){if(i>=3&&i<=13)return money(v);return Math.round(v).toLocaleString();}return v;}
-function renderTable(id,heads,rows,formatMoney){let html='<thead><tr>'+heads.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';rows.forEach(r=>{html+='<tr>'+r.map((c,i)=>`<td>${formatMoney?formatValue(i,c):c}</td>`).join('')+'</tr>';});html+='</tbody>';document.getElementById(id).innerHTML=html;}
+function renderTable(id,heads,rows,formatMoney){let html='<thead><tr>'+heads.map(h=>`<th>${h}</th>`).join('')+'</tr></thead><tbody>';rows.forEach(r=>{const cls=String(r[0])==='Total'?' class="total-row"':'';html+='<tr'+cls+'>'+r.map((c,i)=>`<td>${formatMoney?formatValue(i,c):c}</td>`).join('')+'</tr>';});html+='</tbody>';document.getElementById(id).innerHTML=html;}
 function renderSimpleTable(id,heads,rows){
   function cellVal(c,i){
     const h=String(heads[i]||'');
