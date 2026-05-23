@@ -96,6 +96,12 @@ table{width:100%;border-collapse:collapse;font-size:12px;} th,td{padding:9px 8px
 /* pareto visual upgrade */
 @media(max-width:680px){.chart.pareto-mobile{height:300px!important;}}
 
+
+.summary-chart-stack{display:flex;flex-direction:column;gap:14px;margin-bottom:14px;}
+.summary-chart-stack .chart-box{width:100%;}
+.summary-chart-stack .chart.lg{height:430px;}
+@media(max-width:680px){.summary-chart-stack .chart.lg{height:340px;}}
+
 </style>
 </head>
 <body>
@@ -147,7 +153,7 @@ table{width:100%;border-collapse:collapse;font-size:12px;} th,td{padding:9px 8px
       비용 = 상품원가 + 내부출고비 + 쇼핑몰수수료<br>
       순이익 = 매출수익 - 비용 / 광고차감 순이익 = 순이익 - 광고비<br>매출수익 구성 = 쇼핑몰수수료 + 상품원가 + 내부출고비 + 광고비 + 광고차감 순이익
     </div>
-    <div class="row2">
+    <div class="summary-chart-stack">
       <div class="chart-box"><div class="box-head"><div class="chart-title">일자별 매출 · 순이익 · 광고차감 순이익</div><div class="hint">선택 기간 전체 날짜 표시 / 미래 날짜는 공백 / 단위: 만원</div></div><div class="chart lg"><canvas id="dailyProfitChart"></canvas></div></div>
       <div class="chart-box"><div class="box-head"><div class="chart-title">전동기 대비 일자별 매출 · 순이익</div><div class="hint" id="compareHint">선택 기간과 같은 일수 기준</div></div><div class="chart lg"><canvas id="compareProfitChart"></canvas></div></div>
     </div>
