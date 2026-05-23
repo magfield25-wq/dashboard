@@ -806,11 +806,16 @@ draw('forecastChart','bar',['방문자','주문','매출(만원)'],[
 
 
 function renderTrendTable(id,dates,visits,orders,revs){
-  const rows=(dates||[]).map((d,i)=>({d,visit:Number(visits[i])||0,orders:Number(orders[i])||0,rev:Number(revs[i])||0}));
+  const rows=(dates||[]).map((d,i)=>{
+    const visit=Number(visits[i])||0, ordersN=Number(orders[i])||0, rev=Number(revs[i])||0;
+    return {d,visit,orders:ordersN,rev,conv:visit?(ordersN/visit*100):0,basket:ordersN?(rev*10000/ordersN):0};
+  });
   const total=rows.reduce((a,r)=>{a.visit+=r.visit;a.orders+=r.orders;a.rev+=r.rev;return a;},{visit:0,orders:0,rev:0});
-  let html='<tr><th>일자</th><th>방문자</th><th>주문건수</th><th>매출(만원)</th></tr>';
-  html+=rows.map(r=>`<tr><td>${String(r.d).slice(5)}</td><td>${Math.round(r.visit).toLocaleString()}</td><td>${Math.round(r.orders).toLocaleString()}</td><td>${Math.round(r.rev).toLocaleString()}</td></tr>`).join('');
-  html+=`<tr class="total-row"><th>Total</th><th>${Math.round(total.visit).toLocaleString()}</th><th>${Math.round(total.orders).toLocaleString()}</th><th>${Math.round(total.rev).toLocaleString()}</th></tr>`;
+  const totalConv=total.visit?(total.orders/total.visit*100):0;
+  const totalBasket=total.orders?(total.rev*10000/total.orders):0;
+  let html='<tr><th>일자</th><th>방문자</th><th>주문건수</th><th>매출(만원)</th><th>전환율</th><th>객단가</th></tr>';
+  html+=rows.map(r=>`<tr><td>${String(r.d).slice(5)}</td><td>${Math.round(r.visit).toLocaleString()}</td><td>${Math.round(r.orders).toLocaleString()}</td><td>${Math.round(r.rev).toLocaleString()}</td><td>${r.conv.toFixed(1)}%</td><td>${Math.round(r.basket).toLocaleString()}</td></tr>`).join('');
+  html+=`<tr class="total-row"><th>Total</th><th>${Math.round(total.visit).toLocaleString()}</th><th>${Math.round(total.orders).toLocaleString()}</th><th>${Math.round(total.rev).toLocaleString()}</th><th>${totalConv.toFixed(1)}%</th><th>${Math.round(totalBasket).toLocaleString()}</th></tr>`;
   const el=document.getElementById(id); if(el)el.innerHTML=html;
 }
 
