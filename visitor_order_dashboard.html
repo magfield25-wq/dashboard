@@ -311,8 +311,6 @@ body.locked .header,body.locked .container{filter:blur(2px);pointer-events:none;
 .customer-sort{display:flex;gap:8px;margin:8px 0 12px;flex-wrap:wrap;}
 .customer-sort button{border:1px solid #dadce0;background:#fff;color:#202124;border-radius:999px;padding:7px 11px;font-size:12px;font-weight:800;cursor:pointer;}
 .customer-sort button.active{background:#1a73e8;color:#fff;border-color:#1a73e8;}
-.customer-note{margin-bottom:14px;background:#eef3fe;border:1px solid #d2e3fc;color:#174ea6;border-radius:12px;padding:12px 14px;font-size:12px;font-weight:700;line-height:1.55;}
-.customer-block{margin-bottom:14px;}
 @media(max-width:680px){
   .dist-grid{grid-template-columns:1fr;gap:10px;}
   .heatmap-table{font-size:9px;border-spacing:2px;min-width:620px;}
@@ -518,54 +516,26 @@ body.locked .header,body.locked .container{filter:blur(2px);pointer-events:none;
     </div>
   </div>
   <div id="customer" class="panel">
-    <div class="customer-note">MASTER의 <b>고객구분</b> 값을 기준으로 집계합니다. 값은 개인, 사업체, 미분류로 표시하며, 미분류는 고객구분 배치가 아직 기록하지 않은 주문입니다.</div>
-    <div class="metrics">
-      <div class="metric blue"><div class="metric-label">분류 완료 주문</div><div class="metric-value" id="custClassified">-</div><div class="metric-sub" id="custClassifiedSub">-</div></div>
-      <div class="metric green"><div class="metric-label">개인 매출</div><div class="metric-value" id="custPersonalRev">-</div><div class="metric-sub" id="custPersonalSub">-</div></div>
-      <div class="metric amber"><div class="metric-label">사업체 매출</div><div class="metric-value" id="custBusinessRev">-</div><div class="metric-sub" id="custBusinessSub">-</div></div>
-      <div class="metric red"><div class="metric-label">사업체 매출비중</div><div class="metric-value" id="custBusinessShare">-</div><div class="metric-sub">분류 완료 매출 기준</div></div>
-      <div class="metric gray"><div class="metric-label">개인 객단가</div><div class="metric-value" id="custPersonalAov">-</div><div class="metric-sub">개인 매출 ÷ 주문건수</div></div>
-      <div class="metric blue"><div class="metric-label">사업체 객단가</div><div class="metric-value" id="custBusinessAov">-</div><div class="metric-sub">사업체 매출 ÷ 주문건수</div></div>
-    </div>
-    <div class="row2 customer-block">
-      <div class="table-box"><div class="box-head"><div class="chart-title">고객구분별 실적</div><div class="hint">고객수는 구매자 식별 컬럼이 있을 때 집계</div></div><table id="customerTypeSummaryTable"></table></div>
-      <div class="chart-box"><div class="box-head"><div class="chart-title">고객구분별 매출 비중</div><div class="hint">정산금액 기준</div></div><div class="chart sm"><canvas id="customerTypeRevenueChart"></canvas></div></div>
-    </div>
-    <div class="row2 customer-block">
-      <div class="chart-box"><div class="box-head"><div class="chart-title">고객구분별 일자별 주문 추이</div><div class="hint">주문번호 기준</div></div><div class="chart"><canvas id="customerDailyOrdersChart"></canvas></div></div>
-      <div class="chart-box"><div class="box-head"><div class="chart-title">고객구분별 일자별 매출 추이</div><div class="hint">정산금액 · 만원</div></div><div class="chart"><canvas id="customerDailyRevenueChart"></canvas></div></div>
-    </div>
-    <div class="table-box customer-block"><div class="box-head"><div class="chart-title">일자별 고객구분 실적표</div><div class="hint">주문건수 / 정산금액</div></div><div style="overflow-x:auto;"><table id="customerDailyTable"></table></div></div>
-    <div class="row2 customer-block">
-      <div class="chart-box"><div class="box-head"><div class="chart-title">시간대별 고객구분 현황</div><div class="hint">막대: 주문건수 · 선: 매출(만원)</div></div><div class="chart"><canvas id="customerHourChart"></canvas></div></div>
-      <div class="chart-box"><div class="box-head"><div class="chart-title">요일별 고객구분 현황</div><div class="hint">막대: 주문건수 · 선: 매출(만원)</div></div><div class="chart"><canvas id="customerDowChart"></canvas></div></div>
-    </div>
-    <div class="row2 customer-block">
-      <div class="chart-box"><div class="box-head"><div class="chart-title">고객구분별 상품 카테고리 선호</div><div class="hint">카테고리대별 정산금액 · 만원</div></div><div class="chart"><canvas id="customerCategoryChart"></canvas></div></div>
-      <div class="table-box"><div class="box-head"><div class="chart-title">고객구분별 재구매 현황</div><div class="hint">동일 고객 2회 이상 주문 기준</div></div><table id="customerRepeatTable"></table></div>
-    </div>
-    <div class="table-box customer-block"><div class="box-head"><div class="chart-title">카테고리별 고객구분 실적표</div><div class="hint">분류 완료 주문의 카테고리대 기준</div></div><div style="overflow-x:auto;"><table id="customerCategoryTable"></table></div></div>
+
     <div class="dist-grid">
       <div class="chart-box"><div class="box-head"><div class="chart-title">구매금액 분포</div><div class="hint">고객별 누적 구매금액 구간</div></div><div class="chart dist-mobile"><canvas id="customerAmountDistChart"></canvas></div></div>
       <div class="chart-box"><div class="box-head"><div class="chart-title">재구매 분포</div><div class="hint">고객별 주문횟수 구간</div></div><div class="chart dist-mobile"><canvas id="customerRepeatDistChart"></canvas></div></div>
     </div>
-    <div class="table-box"><div class="box-head"><div class="chart-title">고객별 구매 현황</div><div class="hint">MASTER 고객구분 적용 / 구매자 식별 컬럼이 있을 때 표시</div></div><div class="customer-sort"><button id="sortOrdersBtn" class="active" onclick="setCustomerSort('orders')">주문횟수순</button><button id="sortRevenueBtn" onclick="setCustomerSort('revenue')">구매금액순</button></div><div style="overflow-x:auto;"><table id="customerTable"></table></div></div>
+    <div class="table-box"><div class="box-head"><div class="chart-title">개인/사업자 매출 추정</div><div class="hint">수취인명·구매자명·배송지/상호성 키워드 기반 추정 / 개인정보는 마스킹</div></div><table id="customerTypeSummaryTable"></table></div>
+    <div class="table-box"><div class="box-head"><div class="chart-title">충성고객 후보</div><div class="hint">구매자명/구매자ID/수취인 컬럼이 있을 때 표시</div></div><div class="customer-sort"><button id="sortOrdersBtn" class="active" onclick="setCustomerSort('orders')">주문횟수순</button><button id="sortRevenueBtn" onclick="setCustomerSort('revenue')">구매금액순</button></div><table id="customerTable"></table></div>
   </div>
 </div>
 <script>
 const SHEET_VISIT = '16amNelj6fvy4imsJDN8hDWwaQ7Dqg7jvfksrDHL6kgI';
 const SHEET_SALES = '18c14-81OIyTkA134TqGXHpaSvexg_m8O67IDkECpcIQ';
-const QUERY_VISIT = 'select B,C,D,F,G';
-const QUERY_SALES = 'select A,B,J,K,L,R,X,BC,BD,BI,BK,BQ,BS';
-const QUERY_PRICE = 'select A,K,L,M';
 const DOW = ['일','월','화','수','목','금','토'];
 let charts = {};
 let rawVisit = [], rawSales = [], rawPriceMap = [];
 const dlNum={display:(ctx)=>{const v=ctx.dataset.data[ctx.dataIndex];return v!==null&&v!==undefined&&Number(v)!==0;},anchor:'end',align:'top',offset:2,formatter:v=>Number(v).toLocaleString(),font:{weight:'700',size:10},color:'#202124',clip:false};
-function gvizJsonp(baseUrl){return new Promise((resolve,reject)=>{const cb='__gviz_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const script=document.createElement('script');let done=false;const timer=setTimeout(()=>{if(done)return;cleanup();reject(new Error('응답 시간 초과'));},45000);function cleanup(){done=true;clearTimeout(timer);try{delete window[cb];}catch(e){window[cb]=undefined;}if(script.parentNode)script.parentNode.removeChild(script);}window[cb]=function(j){cleanup();resolve(j);};script.onerror=function(){cleanup();reject(new Error('스크립트 로드 실패'));};const sep=baseUrl.includes('?')?'&':'?';script.src=baseUrl+sep+'tqx='+encodeURIComponent('out:json;responseHandler:'+cb)+'&headers=1&rand='+Date.now();document.head.appendChild(script);});}
+function gvizJsonp(baseUrl){return new Promise((resolve,reject)=>{const cb='__gviz_cb_'+Date.now()+'_'+Math.random().toString(36).slice(2);const script=document.createElement('script');let done=false;const timer=setTimeout(()=>{if(done)return;cleanup();reject(new Error('응답 시간 초과'));},20000);function cleanup(){done=true;clearTimeout(timer);try{delete window[cb];}catch(e){window[cb]=undefined;}if(script.parentNode)script.parentNode.removeChild(script);}window[cb]=function(j){cleanup();resolve(j);};script.onerror=function(){cleanup();reject(new Error('스크립트 로드 실패'));};const sep=baseUrl.includes('?')?'&':'?';script.src=baseUrl+sep+'tqx='+encodeURIComponent('out:json;responseHandler:'+cb)+'&headers=1&rand='+Date.now();document.head.appendChild(script);});}
 function formatCell(cell){if(!cell)return null;if(cell.v instanceof Date)return cell.v;if(typeof cell.v==='string'&&/^Date\(/.test(cell.v))return cell.v;if(typeof cell.v==='number')return cell.v;if(cell.f!==undefined&&cell.f!==null&&cell.f!=='')return cell.f;return cell.v??null;}
 function parseGvizResult(j,label){if(!j)throw new Error(label+' 응답 없음');if(j.status==='error'){const msg=(j.errors||[]).map(e=>e.detailed_message||e.message||e.reason).filter(Boolean).join(' / ');throw new Error(label+' 로드 실패: '+(msg||'Google 응답 오류'));}const cols=(j.table?.cols||[]).map((c,i)=>String(c.label||c.id||'col'+i).trim());const rows=(j.table?.rows||[]).map(row=>{const obj={};(row.c||[]).forEach((cell,i)=>{obj[cols[i]]=formatCell(cell);obj[cols[i]+'__rawv']=cell?(cell.v??null):null;});return obj;}).filter(row=>Object.values(row).some(v=>v!==null&&v!==''));if(!rows.length)throw new Error(label+' 시트가 비어있음');return rows;}
-async function fetchSheet(sheetId,sheetName,query){let url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${encodeURIComponent(sheetName)}`;if(query)url+='&tq='+encodeURIComponent(query);return parseGvizResult(await gvizJsonp(url),sheetName);}
+async function fetchSheet(sheetId,sheetName){const url=`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?sheet=${encodeURIComponent(sheetName)}`;return parseGvizResult(await gvizJsonp(url),sheetName);}
 function num(v){if(v===null||v===undefined||v==='')return 0;if(typeof v==='number')return v;const n=Number(String(v).replace(/,/g,'').trim());return Number.isFinite(n)?n:0;}
 function parseDate(s){if(!s)return null;if(s instanceof Date)return s;if(typeof s==='number'){const base=new Date(1899,11,30);const days=Math.floor(s);const frac=s-days;const d=new Date(base);d.setDate(d.getDate()+days);const totalSecs=Math.round(frac*86400);d.setHours(Math.floor(totalSecs/3600),Math.floor((totalSecs%3600)/60),totalSecs%60,0);return d;}const str=String(s).trim();let m=str.match(/Date\((\d+),(\d+),(\d+)(?:,(\d+),(\d+),(\d+))?\)/);if(m)return new Date(+m[1],+m[2],+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));m=str.match(/(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2}))?)?/);if(m)return new Date(+m[1],+m[2]-1,+m[3],+(m[4]||0),+(m[5]||0),+(m[6]||0));m=str.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);if(m)return new Date(+m[1],+m[2]-1,+m[3]);return null;}
 function ymd(d){if(!d)return '';return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
@@ -618,9 +588,9 @@ async function loadData(){
   document.getElementById('status').textContent='데이터 로딩 중...';
   try{
     const [visitRows,salesRows,priceRows]=await Promise.all([
-      fetchSheet(SHEET_VISIT,'raw',QUERY_VISIT),
-      fetchSheet(SHEET_SALES,'MASTER',QUERY_SALES),
-      fetchSheet(SHEET_SALES,'단가_매핑',QUERY_PRICE)
+      fetchSheet(SHEET_VISIT,'raw'),
+      fetchSheet(SHEET_SALES,'MASTER'),
+      fetchSheet(SHEET_SALES,'단가_매핑')
     ]);
 
     rawVisit=visitRows;
@@ -830,7 +800,7 @@ draw('forecastChart','bar',['방문자','주문','매출(만원)'],[
       color:'#202124'
     }
   });
-  renderConversion(visit,sales);renderCompetitor(start,end);renderHistory(dates,dailyVisits,dailyOrders,dailyRev,visit,sales);renderProduct(sales);renderCustomer(sales,dates);
+  renderConversion(visit,sales);renderCompetitor(start,end);renderHistory(dates,dailyVisits,dailyOrders,dailyRev,visit,sales);renderProduct(sales);renderCustomer(sales);
   document.getElementById('status').textContent=`분석 완료: ${sel.label} / ${start} ~ ${end}`;
 }
 
@@ -1688,198 +1658,107 @@ function setSimpleTable(id, headers, rows){
 
 let customerSortMode='orders';
 let lastCustomerSales=null;
-let lastCustomerDates=null;
 function setCustomerSort(mode){
   customerSortMode=mode;
   const a=document.getElementById('sortOrdersBtn'), b=document.getElementById('sortRevenueBtn');
   if(a)a.classList.toggle('active',mode==='orders');
   if(b)b.classList.toggle('active',mode==='revenue');
-  if(lastCustomerSales)renderCustomer(lastCustomerSales,lastCustomerDates);
+  if(lastCustomerSales)renderCustomer(lastCustomerSales);
 }
 
-const CUSTOMER_TYPES=['개인','사업체','미분류'];
-const CUSTOMER_COLORS={개인:'#1a73e8',사업체:'#f9ab00',미분류:'#9aa0a6'};
-function normalizeCustomerType(value){
-  const v=String(value||'').trim();
-  if(v==='개인')return '개인';
-  if(v==='사업체'||v==='사업자')return '사업체';
-  return '미분류';
-}
-function getCustomerKeyColumn(sales){
-  const candidates=['구매자명','구매자ID','구매자 아이디','수취인명','수령인','주문자명'];
-  return candidates.find(c=>sales.lineRows.some(r=>String(r[c]||'').trim()))||'';
-}
-function emptyCustomerPerformance(){
-  return {orders:0,rev:0,customers:new Set()};
-}
-function buildCustomerTypeAnalysis(sales,dates){
-  const keyCol=getCustomerKeyColumn(sales);
-  const totals={개인:emptyCustomerPerformance(),사업체:emptyCustomerPerformance(),미분류:emptyCustomerPerformance()};
-  const orderMap={};
-  const customers={};
-  const daily={};
-  const hourly=Array.from({length:24},()=>({개인:emptyCustomerPerformance(),사업체:emptyCustomerPerformance(),미분류:emptyCustomerPerformance()}));
-  const dow=Array.from({length:7},()=>({개인:emptyCustomerPerformance(),사업체:emptyCustomerPerformance(),미분류:emptyCustomerPerformance()}));
-  const category={};
-  const categoryByCode={};
-
-  rawPriceMap.forEach(r=>{
-    const code=String(r['기준상품코드']||'').trim();
-    if(code)categoryByCode[code]=String(r['카테고리대']||'미분류').trim()||'미분류';
-  });
-
-  sales.lineRows.forEach(r=>{
-    const orderNo=String(r.orderNo||'').trim();
-    if(!orderNo)return;
-    const rowType=normalizeCustomerType(r['고객구분']);
-    if(!orderMap[orderNo]){
-      orderMap[orderNo]={orderNo,type:rowType,rev:0,ds:r.ds,h:r.h,dow:r.dow,customer:keyCol?String(r[keyCol]||'').trim():''};
-    }else if(orderMap[orderNo].type==='미분류' && rowType!=='미분류'){
-      orderMap[orderNo].type=rowType;
-    }else if(orderMap[orderNo].type==='개인' && rowType==='사업체'){
-      orderMap[orderNo].type='사업체';
-    }
-    orderMap[orderNo].rev+=r.amt||0;
-  });
-
-  Object.values(orderMap).forEach(o=>{
-    const bucket=totals[o.type];
-    bucket.orders++;
-    bucket.rev+=o.rev;
-    if(o.customer)bucket.customers.add(o.customer);
-
-    if(!daily[o.ds])daily[o.ds]={개인:emptyCustomerPerformance(),사업체:emptyCustomerPerformance(),미분류:emptyCustomerPerformance()};
-    daily[o.ds][o.type].orders++;
-    daily[o.ds][o.type].rev+=o.rev;
-    hourly[o.h][o.type].orders++;
-    hourly[o.h][o.type].rev+=o.rev;
-    dow[o.dow][o.type].orders++;
-    dow[o.dow][o.type].rev+=o.rev;
-
-    if(o.customer){
-      const id=o.type+'||'+o.customer;
-      if(!customers[id])customers[id]={name:o.customer,type:o.type,orders:0,rev:0,last:''};
-      customers[id].orders++;
-      customers[id].rev+=o.rev;
-      if(!customers[id].last||o.ds>customers[id].last)customers[id].last=o.ds;
-    }
-  });
-
-  sales.lineRows.forEach(r=>{
-    const type=orderMap[r.orderNo]?.type||normalizeCustomerType(r['고객구분']);
-    const cat=String(r['카테고리대']||categoryByCode[r.code]||'미분류').trim()||'미분류';
-    if(!category[cat])category[cat]={개인:{orders:new Set(),rev:0},사업체:{orders:new Set(),rev:0},미분류:{orders:new Set(),rev:0}};
-    category[cat][type].orders.add(r.orderNo);
-    category[cat][type].rev+=r.amt||0;
-  });
-
-  return {keyCol,totals,orderMap,customers,daily,hourly,dow,category,dates:dates||Object.keys(daily).sort()};
-}
-function renderCustomerTypeSummary(data){
-  const personal=data.totals.개인, business=data.totals.사업체, unknown=data.totals.미분류;
-  const totalOrders=CUSTOMER_TYPES.reduce((sum,t)=>sum+data.totals[t].orders,0);
-  const classifiedOrders=personal.orders+business.orders;
-  const classifiedRev=personal.rev+business.rev;
-  const totalRev=classifiedRev+unknown.rev;
-  document.getElementById('custClassified').textContent=totalOrders?(classifiedOrders/totalOrders*100).toFixed(1)+'%':'-';
-  document.getElementById('custClassifiedSub').textContent=`${classifiedOrders.toLocaleString()} / ${totalOrders.toLocaleString()}건 완료 · 미분류 ${unknown.orders.toLocaleString()}건`;
-  document.getElementById('custPersonalRev').textContent=money(personal.rev);
-  document.getElementById('custPersonalSub').textContent=`${personal.orders.toLocaleString()}건 · 매출 ${(classifiedRev?personal.rev/classifiedRev*100:0).toFixed(1)}%`;
-  document.getElementById('custBusinessRev').textContent=money(business.rev);
-  document.getElementById('custBusinessSub').textContent=`${business.orders.toLocaleString()}건 · 매출 ${(classifiedRev?business.rev/classifiedRev*100:0).toFixed(1)}%`;
-  document.getElementById('custBusinessShare').textContent=classifiedRev?(business.rev/classifiedRev*100).toFixed(1)+'%':'-';
-  document.getElementById('custPersonalAov').textContent=money(personal.orders?personal.rev/personal.orders:0,1);
-  document.getElementById('custBusinessAov').textContent=money(business.orders?business.rev/business.orders:0,1);
-
-  const summaryRows=CUSTOMER_TYPES.map(t=>{
-    const b=data.totals[t];
-    return [t,data.keyCol?b.customers.size:'-',b.orders,money(b.rev),totalRev?(b.rev/totalRev*100).toFixed(1)+'%':'0.0%',b.orders?money(b.rev/b.orders,1):'0원'];
-  });
-  summaryRows.push(['Total',data.keyCol?new Set(Object.values(data.customers).map(c=>c.name)).size:'-',totalOrders,money(totalRev),'100.0%',totalOrders?money(totalRev/totalOrders,1):'0원']);
-  setSimpleTable('customerTypeSummaryTable',['구분','고객수','주문건수','정산금액','매출비중','객단가'],summaryRows);
-  draw('customerTypeRevenueChart','doughnut',CUSTOMER_TYPES,
-    [{label:'정산금액',data:CUSTOMER_TYPES.map(t=>Math.round(data.totals[t].rev))}],
-    true,{datalabels:{display:(ctx)=>Number(ctx.dataset.data[ctx.dataIndex])>0,formatter:(v,ctx)=>{const sum=ctx.chart.data.datasets[0].data.reduce((a,b)=>a+Number(b||0),0);return `${ctx.chart.data.labels[ctx.dataIndex]}\n${money(v)}\n${sum?(v/sum*100).toFixed(1):'0.0'}%`;},font:{weight:'700',size:10},color:'#202124'}});
-}
-function renderCustomerDaily(data){
-  const dates=data.dates||[];
-  const labels=dates.map(d=>String(d).slice(5));
-  draw('customerDailyOrdersChart','line',labels,CUSTOMER_TYPES.map(t=>({
-    label:t,data:dates.map(d=>data.daily[d]?.[t].orders||0),borderColor:CUSTOMER_COLORS[t],backgroundColor:CUSTOMER_COLORS[t],borderWidth:3,pointRadius:2,tension:.25
-  })),true,{});
-  draw('customerDailyRevenueChart','line',labels,CUSTOMER_TYPES.map(t=>({
-    label:t,data:dates.map(d=>Math.round((data.daily[d]?.[t].rev||0)/10000)),borderColor:CUSTOMER_COLORS[t],backgroundColor:CUSTOMER_COLORS[t],borderWidth:3,pointRadius:2,tension:.25
-  })),true,{});
-  const rows=dates.map(d=>[
-    String(d).slice(5),
-    data.daily[d]?.개인.orders||0,money(data.daily[d]?.개인.rev||0),
-    data.daily[d]?.사업체.orders||0,money(data.daily[d]?.사업체.rev||0),
-    data.daily[d]?.미분류.orders||0,money(data.daily[d]?.미분류.rev||0)
-  ]);
-  rows.push(['Total',data.totals.개인.orders,money(data.totals.개인.rev),data.totals.사업체.orders,money(data.totals.사업체.rev),data.totals.미분류.orders,money(data.totals.미분류.rev)]);
-  setSimpleTable('customerDailyTable',['일자','개인 주문','개인 매출','사업체 주문','사업체 매출','미분류 주문','미분류 매출'],rows);
-}
-function customerPeriodDatasets(buckets){
-  return [
-    {label:'개인 주문',type:'bar',data:buckets.map(b=>b.개인.orders),backgroundColor:'rgba(26,115,232,.72)',borderColor:'#1a73e8',yAxisID:'y',order:1},
-    {label:'사업체 주문',type:'bar',data:buckets.map(b=>b.사업체.orders),backgroundColor:'rgba(249,171,0,.72)',borderColor:'#f9ab00',yAxisID:'y',order:1},
-    {label:'미분류 주문',type:'bar',data:buckets.map(b=>b.미분류.orders),backgroundColor:'rgba(154,160,166,.6)',borderColor:'#9aa0a6',yAxisID:'y',order:1},
-    {label:'개인 매출(만원)',type:'line',data:buckets.map(b=>Math.round(b.개인.rev/10000)),borderColor:'#174ea6',borderWidth:2,pointRadius:2,tension:.25,yAxisID:'y1',order:2},
-    {label:'사업체 매출(만원)',type:'line',data:buckets.map(b=>Math.round(b.사업체.rev/10000)),borderColor:'#d93025',borderWidth:2,pointRadius:2,tension:.25,yAxisID:'y1',order:2}
-  ];
-}
-function renderCustomerTime(data){
-  draw('customerHourChart','bar',Array.from({length:24},(_,h)=>h+'시'),customerPeriodDatasets(data.hourly),true,{yTitle:'주문건수',y1Title:'매출(만원)'});
-  draw('customerDowChart','bar',DOW,customerPeriodDatasets(data.dow),true,{yTitle:'주문건수',y1Title:'매출(만원)'});
-}
-function renderCustomerCategory(data){
-  const rows=Object.entries(data.category).map(([cat,v])=>({
-    cat,personalOrders:v.개인.orders.size,personalRev:v.개인.rev,businessOrders:v.사업체.orders.size,businessRev:v.사업체.rev,unknownOrders:v.미분류.orders.size,unknownRev:v.미분류.rev
-  })).sort((a,b)=>(b.personalRev+b.businessRev)-(a.personalRev+a.businessRev));
-  const chartRows=rows.slice(0,10);
-  draw('customerCategoryChart','bar',chartRows.map(r=>r.cat),[
-    {label:'개인 매출(만원)',data:chartRows.map(r=>Math.round(r.personalRev/10000)),backgroundColor:'rgba(26,115,232,.74)',borderColor:'#1a73e8',borderWidth:1},
-    {label:'사업체 매출(만원)',data:chartRows.map(r=>Math.round(r.businessRev/10000)),backgroundColor:'rgba(249,171,0,.75)',borderColor:'#f9ab00',borderWidth:1}
-  ],true,{});
-  const tableRows=rows.map(r=>[r.cat,r.personalOrders,money(r.personalRev),r.businessOrders,money(r.businessRev),r.unknownOrders,money(r.unknownRev)]);
-  setSimpleTable('customerCategoryTable',['카테고리대','개인 주문','개인 매출','사업체 주문','사업체 매출','미분류 주문','미분류 매출'],tableRows.length?tableRows:[['데이터 없음','-','-','-','-','-','-']]);
-}
-function renderCustomerRepeat(data){
-  if(!data.keyCol){
-    setSimpleTable('customerRepeatTable',['안내'],[['MASTER에 구매자명/구매자ID/수취인명 계열 컬럼이 필요합니다.']]);
-    return;
+function firstNonEmpty(row,names){
+  for(const n of names){
+    const v=String(row[n]||'').trim();
+    if(v)return {name:n,value:v};
   }
-  const rows=['개인','사업체','미분류'].map(t=>{
-    const customers=Object.values(data.customers).filter(c=>c.type===t);
-    const repeat=customers.filter(c=>c.orders>=2);
-    const repeatRev=repeat.reduce((sum,c)=>sum+c.rev,0);
-    return [t,customers.length,repeat.length,customers.length?(repeat.length/customers.length*100).toFixed(1)+'%':'0.0%',money(repeatRev)];
-  });
-  setSimpleTable('customerRepeatTable',['구분','고객수','재구매 고객','재구매율','재구매 고객 매출'],rows);
+  return {name:'',value:''};
 }
-function renderCustomer(sales,dates){
+function maskName(v){
+  const s=String(v||'').trim();
+  if(!s)return '';
+  if(s.length<=1)return '*';
+  if(s.length===2)return s[0]+'*';
+  return s[0]+'*'+s[s.length-1];
+}
+function maskText(v){
+  const s=String(v||'').trim();
+  if(!s)return '';
+  const parts=s.split(/\s+/).filter(Boolean);
+  if(parts.length>=2)return parts.slice(0,2).join(' ')+' ***';
+  return s.length>3?s.slice(0,3)+'***':maskName(s);
+}
+function findBusinessKeyword(text){
+  const s=String(text||'').toLowerCase();
+  const kws=['주식회사','(주)','㈜','유한회사','법인','회사','상사','산업','공업','공장','기업','업체','사업자','매장','마트','상점','상가','사무실','사무소','관리사무소','학교','초등학교','중학교','고등학교','대학교','학원','유치원','어린이집','병원','의원','약국','의료원','연구소','연구원','센터','협회','조합','재단','교회','성당','사찰','카페','식당','물류','창고','관공서','군청','시청','구청'];
+  return kws.find(k=>s.includes(k.toLowerCase()))||'';
+}
+function classifyCustomerLine(r){
+  const bizNo=firstNonEmpty(r,['사업자등록번호','사업자 번호','사업자번호','사업자']);
+  if(bizNo.value)return {type:'사업자',reason:'사업자번호',evidence:'사업자번호: ***'};
+  const company=firstNonEmpty(r,['상호','회사명','업체명','법인명','기업명','사업장명']);
+  if(company.value)return {type:'사업자',reason:company.name,evidence:`${company.name}: ${maskText(company.value)}`};
+
+  const candidates=[
+    firstNonEmpty(r,['수취인명','수령인','받는분','수취인']),
+    firstNonEmpty(r,['구매자명','주문자명','주문자','구매자']),
+    firstNonEmpty(r,['배송지','주소','수취인 주소','수취인주소','기본배송지','배송지주소']),
+    firstNonEmpty(r,['배송메세지','배송메시지','배송 요청사항','배송요청사항','메모'])
+  ].filter(x=>x.value);
+
+  for(const c of candidates){
+    const kw=findBusinessKeyword(c.value);
+    if(kw)return {type:'사업자',reason:`${c.name} 키워드(${kw})`,evidence:`${c.name}: ${maskText(c.value)}`};
+  }
+
+  const person=firstNonEmpty(r,['구매자명','주문자명','수취인명','수령인','받는분','구매자ID','구매자 아이디']);
+  return {type:'개인',reason:person.name?person.name:'사업자 키워드 없음',evidence:person.value?`${person.name}: ${maskName(person.value)}`:'-'};
+}
+function renderCustomer(sales){
   lastCustomerSales=sales;
-  lastCustomerDates=dates;
   renderCustomerDistributions(sales);
-  const data=buildCustomerTypeAnalysis(sales,dates);
-  renderCustomerTypeSummary(data);
-  renderCustomerDaily(data);
-  renderCustomerTime(data);
-  renderCustomerCategory(data);
-  renderCustomerRepeat(data);
-  if(!data.keyCol){
-    setSimpleTable('customerTable',['안내'],[['MASTER에 구매자명/구매자ID/수취인명 계열 컬럼이 있으면 고객별 구매 현황을 표시할 수 있습니다.']]);
-    return;
-  }
-  const allRows=Object.values(data.customers).sort((a,b)=>{
-    if(customerSortMode==='revenue')return b.rev-a.rev || b.orders-a.orders;
-    return b.orders-a.orders || b.rev-a.rev;
+  const candidates=['구매자명','구매자ID','구매자 아이디','수취인명','수령인','주문자명'];
+  const keyCol=candidates.find(c=>sales.lineRows.some(r=>String(r[c]||'').trim()));
+  if(!keyCol){setSimpleTable('customerTable',['안내'],[['MASTER에 구매자명/구매자ID/수취인명 계열 컬럼이 있으면 충성고객 분석을 표시할 수 있습니다.']]);return;}
+  const by={};
+  sales.lineRows.forEach(r=>{
+    const k=String(r[keyCol]||'').trim();if(!k)return;
+    if(!by[k])by[k]={name:k,orders:new Set(),rev:0,last:'',bizScore:0,personScore:0,reasons:{},evidence:{}};
+    by[k].orders.add(String(r['주문번호']||r['상품주문번호']||''));
+    by[k].rev+=r.amt;
+    if(!by[k].last||r.ds>by[k].last)by[k].last=r.ds;
+    const cls=classifyCustomerLine(r);
+    if(cls.type==='사업자')by[k].bizScore++; else by[k].personScore++;
+    by[k].reasons[cls.reason]=(by[k].reasons[cls.reason]||0)+1;
+    if(cls.evidence)by[k].evidence[cls.evidence]=(by[k].evidence[cls.evidence]||0)+1;
   });
+  const allRows=Object.values(by).map(r=>{
+    const type=r.bizScore>0?'사업자':'개인';
+    const topReason=Object.entries(r.reasons).sort((a,b)=>b[1]-a[1])[0]?.[0]||'-';
+    const topEvidence=Object.entries(r.evidence).sort((a,b)=>b[1]-a[1])[0]?.[0]||'-';
+    return {...r,type,reason:topReason,evidence:topEvidence};
+  }).sort((a,b)=>{
+    if(customerSortMode==='revenue')return b.rev-a.rev || b.orders.size-a.orders.size;
+    return b.orders.size-a.orders.size || b.rev-a.rev;
+  });
+
+  const summary={개인:{customers:0,orders:0,rev:0},사업자:{customers:0,orders:0,rev:0}};
+  allRows.forEach(r=>{
+    summary[r.type].customers++;
+    summary[r.type].orders+=r.orders.size;
+    summary[r.type].rev+=r.rev;
+  });
+  const totalRev=summary.개인.rev+summary.사업자.rev;
+  setSimpleTable('customerTypeSummaryTable',
+    ['구분','고객수','주문횟수','구매금액','매출비중'],
+    ['개인','사업자'].map(t=>[t,summary[t].customers,summary[t].orders,money(summary[t].rev),totalRev?(summary[t].rev/totalRev*100).toFixed(1)+'%':'0.0%'])
+      .concat([['Total',summary.개인.customers+summary.사업자.customers,summary.개인.orders+summary.사업자.orders,money(totalRev),'100.0%']])
+  );
+
   const total={orders:0,rev:0};
-  allRows.forEach(r=>{total.orders+=r.orders; total.rev+=r.rev;});
-  const tableRows=allRows.map(r=>[r.name,r.type,r.orders,money(r.rev),r.last,r.orders>=2?'재구매 고객':'1회 구매']);
-  tableRows.push(['Total','-',total.orders,money(total.rev),'-','-']);
-  setSimpleTable('customerTable',['고객','고객구분','주문횟수','총구매금액','최근구매일','구매상태'],tableRows);
+  allRows.forEach(r=>{total.orders+=r.orders.size; total.rev+=r.rev;});
+  const tableRows=allRows.map(r=>[r.name,r.type,r.orders.size,money(r.rev),r.last,r.orders.size>=2?'충성고객 후보':'일회성/대량 후보',r.reason,r.evidence]);
+  tableRows.push(['Total','-',total.orders,money(total.rev),'-','-','-','-']);
+  setSimpleTable('customerTable',['고객','개인/사업자','주문횟수','총구매금액','최근구매일','분류','판별기준','마스킹 근거'],tableRows);
 }
 function draw(id,type,labels,datasets,legend=false,extraOptions={}){
   if(charts[id])charts[id].destroy();
